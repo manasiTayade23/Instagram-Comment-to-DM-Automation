@@ -33,9 +33,11 @@ import { InstagramPost } from '../types'
 interface PostSelectorProps {
   selectedPost: InstagramPost | null
   onPostSelect: (post: InstagramPost) => void
+  onNext: () => void
+  canProceed: boolean
 }
 
-const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect }) => {
+const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect, onNext, canProceed }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'post' | 'reel'>('all')
   const [expandedVideo, setExpandedVideo] = useState(false)
@@ -123,29 +125,6 @@ const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect 
         <Instagram sx={{ color: 'primary.main', fontSize: 32 }} />
       </Box>
 
-      {/* Special Test Reel Highlight */}
-      <Paper sx={{ 
-        p: 3, 
-        mb: 3, 
-        background: 'linear-gradient(135deg, #E4405F 0%, #405DE6 100%)',
-        color: 'white'
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mr: 1 }}>
-            🎯 Test Your Automation!
-          </Typography>
-        </Box>
-        <Typography variant="body2" sx={{ mb: 2, opacity: 0.9 }}>
-          Select the "Instagram Automation Tool" reel below to test the complete workflow. 
-          This reel is designed specifically for testing comment-to-DM automation.
-        </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>✅ Perfect for testing automation workflows</Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>✅ Realistic engagement metrics</Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>✅ Ready for comment triggers</Typography>
-        </Box>
-      </Paper>
-
       {/* Search and Filter */}
       <Box sx={{ mb: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
@@ -197,11 +176,7 @@ const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect 
                 borderColor: selectedPost?.id === post.id ? 'primary.main' : 'divider',
                 boxShadow: selectedPost?.id === post.id ? 3 : 1,
                 transform: selectedPost?.id === post.id ? 'scale(1.02)' : 'scale(1)',
-                transition: 'all 0.2s ease-in-out',
-                ...(post.id === '5' && {
-                  background: 'linear-gradient(135deg, #E4405F10 0%, #405DE610 100%)',
-                  borderColor: 'primary.main'
-                })
+                transition: 'all 0.2s ease-in-out'
               }}
               onClick={() => onPostSelect(post)}
             >
@@ -210,7 +185,7 @@ const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect 
                   // Video reel for test content
                   <Box sx={{ position: 'relative', height: 200 }}>
                     <iframe
-                      src="https://www.youtube.com/embed/Ux2zKPR6RD0?controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=Ux2zKPR6RD0&mute=1&autoplay=0"
+                      src="https://www.youtube.com/embed/JoyKXJdWKOE?controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=JoyKXJdWKOE&mute=1&autoplay=0"
                       title="Instagram Automation Demo"
                       style={{ width: '100%', height: '100%', border: 'none' }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -309,21 +284,6 @@ const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect 
                     <Instagram sx={{ color: 'white', fontSize: 16 }} />
                   </Box>
                 )}
-                
-                {post.id === '5' && (
-                  <Chip
-                    label="TEST REEL"
-                    size="small"
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      left: 8,
-                      background: 'linear-gradient(135deg, #E4405F 0%, #405DE6 100%)',
-                      color: 'white',
-                      fontWeight: 600
-                    }}
-                  />
-                )}
               </Box>
               
               <CardContent sx={{ p: 2 }}>
@@ -359,20 +319,6 @@ const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect 
                     </Typography>
                   </Box>
                 </Box>
-                {post.id === '5' && (
-                  <Box sx={{ 
-                    mt: 2, 
-                    p: 1.5, 
-                    backgroundColor: 'primary.light',
-                    borderRadius: 1,
-                    border: '1px solid',
-                    borderColor: 'primary.main'
-                  }}>
-                    <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600 }}>
-                      Perfect for testing! Try commenting "interested" to test the automation.
-                    </Typography>
-                  </Box>
-                )}
               </CardContent>
             </Card>
           </Grid>
@@ -395,7 +341,7 @@ const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect 
         <DialogContent>
           <Box sx={{ position: 'relative', mb: 2 }}>
             <iframe
-              src="https://www.youtube.com/embed/Ux2zKPR6RD0?controls=1&modestbranding=1&rel=0&showinfo=1&autoplay=1&mute=0"
+              src="https://www.youtube.com/embed/JoyKXJdWKOE?controls=1&modestbranding=1&rel=0&showinfo=1&autoplay=1&mute=0"
               title="Instagram Automation Demo"
               style={{ width: '100%', height: 400, border: 'none' }}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -440,6 +386,25 @@ const PostSelector: React.FC<PostSelectorProps> = ({ selectedPost, onPostSelect 
           <Typography variant="body1" sx={{ color: 'text.secondary' }}>
             No posts found matching your criteria
           </Typography>
+        </Box>
+      )}
+
+      {/* Next Button */}
+      {selectedPost && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+          <Button
+            variant="contained"
+            onClick={onNext}
+            disabled={!canProceed}
+            sx={{
+              background: 'linear-gradient(135deg, #E4405F 0%, #405DE6 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #C2185B 0%, #303F9F 100%)'
+              }
+            }}
+          >
+            Next: Configure Trigger
+          </Button>
         </Box>
       )}
     </Paper>

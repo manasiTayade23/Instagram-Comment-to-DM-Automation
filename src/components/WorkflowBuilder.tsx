@@ -27,17 +27,17 @@ const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
   const steps = [
     {
       label: 'Select Post/Reel',
-      description: 'Choose Instagram content to monitor',
+      description: 'Choose Instagram content to monitor for comments',
       icon: <Instagram />
     },
     {
-      label: 'Configure Trigger',
-      description: 'Set up comment conditions',
+      label: 'Configure Comment Trigger',
+      description: 'Set up when comments should trigger DM automation',
       icon: <Message />
     },
     {
-      label: 'Set DM Message',
-      description: 'Create automated response',
+      label: 'Set DM Response',
+      description: 'Create the DM message to send automatically',
       icon: <Send />
     }
   ]
@@ -66,13 +66,17 @@ const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
           <PostSelector
             selectedPost={workflowData.selectedPost}
             onPostSelect={(post) => handleWorkflowUpdate({ selectedPost: post })}
+            onNext={onNext}
+            canProceed={canProceed()}
           />
         )
       case 1:
         return (
           <CommentConfig
             comment={workflowData.comment}
+            triggerType={workflowData.triggerType}
             onCommentChange={(comment) => handleWorkflowUpdate({ comment })}
+            onTriggerTypeChange={(triggerType) => handleWorkflowUpdate({ triggerType })}
             onPrevious={onPrevious}
             onNext={onNext}
             canProceed={canProceed()}
@@ -94,14 +98,13 @@ const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
   }
 
   return (
-    <Box sx={{ display: 'flex', gap: 4, flexDirection: { xs: 'column', lg: 'row' } }}>
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', lg: 'row' }, alignItems: 'flex-start', gap: 4 }}>
       {/* Main Workflow Area */}
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, minWidth: 340, maxWidth: 480 }}>
         <Paper sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h4" component="h2" sx={{ mb: 3, fontWeight: 600, color: 'text.primary' }}>
+          <Typography variant="h4" component="h2" sx={{ mb: 3, fontWeight: 600, color: 'text.primary', textAlign: 'left' }}>
             Build Your Automation
           </Typography>
-          
           <Stepper activeStep={currentStep} orientation="vertical">
             {steps.map((step, index) => (
               <Step key={step.label}>
@@ -140,7 +143,7 @@ const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
       </Box>
 
       {/* Preview Panel */}
-      <Box sx={{ width: { xs: '100%', lg: 400 } }}>
+      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', width: '100%' }}>
         <WorkflowPreview workflowData={workflowData} />
       </Box>
     </Box>

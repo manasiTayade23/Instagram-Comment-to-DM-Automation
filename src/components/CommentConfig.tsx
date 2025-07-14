@@ -20,7 +20,9 @@ import { Message, ArrowBack, ArrowForward } from '@mui/icons-material'
 
 interface CommentConfigProps {
   comment: string
+  triggerType: 'exact' | 'keyword' | 'contains'
   onCommentChange: (comment: string) => void
+  onTriggerTypeChange: (triggerType: 'exact' | 'keyword' | 'contains') => void
   onPrevious: () => void
   onNext: () => void
   canProceed: boolean
@@ -28,13 +30,13 @@ interface CommentConfigProps {
 
 const CommentConfig: React.FC<CommentConfigProps> = ({
   comment,
+  triggerType,
   onCommentChange,
+  onTriggerTypeChange,
   onPrevious,
   onNext,
   canProceed
 }) => {
-  const [triggerType, setTriggerType] = useState<'exact' | 'keyword' | 'contains'>('exact')
-
   const triggerTypes = [
     {
       value: 'exact',
@@ -91,7 +93,7 @@ const CommentConfig: React.FC<CommentConfigProps> = ({
           </FormLabel>
           <RadioGroup
             value={triggerType}
-            onChange={(e) => setTriggerType(e.target.value as 'exact' | 'keyword' | 'contains')}
+            onChange={(e) => onTriggerTypeChange(e.target.value as 'exact' | 'keyword' | 'contains')}
           >
             {triggerTypes.map((type) => (
               <FormControlLabel

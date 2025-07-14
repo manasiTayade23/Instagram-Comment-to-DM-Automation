@@ -84,6 +84,7 @@ function App() {
   const [workflowData, setWorkflowData] = useState({
     selectedPost: null,
     comment: '',
+    triggerType: 'exact' as const,
     dmMessage: '',
     isLive: false
   })

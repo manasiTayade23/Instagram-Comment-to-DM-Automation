@@ -12,6 +12,7 @@ export interface InstagramPost {
 export interface WorkflowData {
   selectedPost: InstagramPost | null
   comment: string
+  triggerType: 'exact' | 'keyword' | 'contains'
   dmMessage: string
   isLive: boolean
 }
