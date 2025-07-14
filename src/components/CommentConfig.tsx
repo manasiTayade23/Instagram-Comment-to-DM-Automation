@@ -1,198 +1,217 @@
 import React, { useState } from 'react'
-import { MessageSquare, Hash, Zap, ArrowLeft, ArrowRight } from 'lucide-react'
+import { 
+  Box, 
+  Paper, 
+  Typography, 
+  TextField, 
+  Button, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem, 
+  Chip,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormLabel,
+  Divider
+} from '@mui/material'
+import { Message, ArrowBack, ArrowForward } from '@mui/icons-material'
 
 interface CommentConfigProps {
   comment: string
   onCommentChange: (comment: string) => void
-  onNext: () => void
   onPrevious: () => void
+  onNext: () => void
+  canProceed: boolean
 }
 
 const CommentConfig: React.FC<CommentConfigProps> = ({
   comment,
   onCommentChange,
+  onPrevious,
   onNext,
-  onPrevious
+  canProceed
 }) => {
-  const [commentType, setCommentType] = useState<'exact' | 'keyword' | 'contains'>('keyword')
+  const [triggerType, setTriggerType] = useState<'exact' | 'keyword' | 'contains'>('exact')
 
-  const suggestedKeywords = [
-    'interested',
-    'more info',
-    'details',
-    'price',
-    'contact',
-    'DM me',
-    'help',
-    'question'
+  const triggerTypes = [
+    {
+      value: 'exact',
+      label: 'Exact Match',
+      description: 'Triggers only when comment exactly matches',
+      example: '"interested"'
+    },
+    {
+      value: 'keyword',
+      label: 'Keyword Match',
+      description: 'Triggers when comment contains specific keywords',
+      example: 'interested, want, need'
+    },
+    {
+      value: 'contains',
+      label: 'Contains Text',
+      description: 'Triggers when comment contains the text',
+      example: 'interested'
+    }
   ]
 
-  const handleKeywordSelect = (keyword: string) => {
-    onCommentChange(keyword)
+  const quickTriggers = [
+    'interested',
+    'want more info',
+    'how much',
+    'details please',
+    'sign me up',
+    'tell me more'
+  ]
+
+  const handleQuickTrigger = (trigger: string) => {
+    onCommentChange(trigger)
   }
 
-  const canProceed = comment.trim().length > 0
-
   return (
-    <div className="card">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Configure Comment Trigger</h2>
-          <p className="text-gray-600">Set up what comments will trigger your DM automation</p>
-        </div>
-        <MessageSquare className="h-8 w-8 text-primary-500" />
-      </div>
+    <Paper sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box>
+          <Typography variant="h5" component="h2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+            Configure Comment Trigger
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Set up when your automation should activate
+          </Typography>
+        </Box>
+        <Message sx={{ color: 'primary.main', fontSize: 32 }} />
+      </Box>
 
-      {/* Comment Type Selection */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Trigger Type
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button
-            onClick={() => setCommentType('exact')}
-            className={`
-              p-4 rounded-lg border-2 text-left transition-all duration-200
-              ${commentType === 'exact'
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-200 hover:border-gray-300'
-              }
-            `}
+      {/* Trigger Type Selection */}
+      <Box sx={{ mb: 4 }}>
+        <FormControl component="fieldset">
+          <FormLabel component="legend" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+            Trigger Type
+          </FormLabel>
+          <RadioGroup
+            value={triggerType}
+            onChange={(e) => setTriggerType(e.target.value as 'exact' | 'keyword' | 'contains')}
           >
-            <div className="flex items-center mb-2">
-              <MessageSquare className={`h-5 w-5 mr-2 ${commentType === 'exact' ? 'text-primary-500' : 'text-gray-400'}`} />
-              <span className={`font-medium ${commentType === 'exact' ? 'text-primary-700' : 'text-gray-700'}`}>
-                Exact Match
-              </span>
-            </div>
-            <p className="text-xs text-gray-600">Trigger only on exact comment text</p>
-          </button>
+            {triggerTypes.map((type) => (
+              <FormControlLabel
+                key={type.value}
+                value={type.value}
+                control={<Radio />}
+                label={
+                  <Box>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      {type.label}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                      {type.description}
+                    </Typography>
+                    <Chip 
+                      label={type.example} 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ fontSize: '0.75rem' }}
+                    />
+                  </Box>
+                }
+                sx={{ 
+                  mb: 2,
+                  p: 2,
+                  border: '1px solid',
+                  borderColor: triggerType === type.value ? 'primary.main' : 'divider',
+                  borderRadius: 2,
+                  backgroundColor: triggerType === type.value ? 'primary.light' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: triggerType === type.value ? 'primary.light' : 'grey.50'
+                  }
+                }}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </Box>
 
-          <button
-            onClick={() => setCommentType('keyword')}
-            className={`
-              p-4 rounded-lg border-2 text-left transition-all duration-200
-              ${commentType === 'keyword'
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-200 hover:border-gray-300'
-              }
-            `}
-          >
-            <div className="flex items-center mb-2">
-              <Hash className={`h-5 w-5 mr-2 ${commentType === 'keyword' ? 'text-primary-500' : 'text-gray-400'}`} />
-              <span className={`font-medium ${commentType === 'keyword' ? 'text-primary-700' : 'text-gray-700'}`}>
-                Keyword
-              </span>
-            </div>
-            <p className="text-xs text-gray-600">Trigger when comment contains keyword</p>
-          </button>
-
-          <button
-            onClick={() => setCommentType('contains')}
-            className={`
-              p-4 rounded-lg border-2 text-left transition-all duration-200
-              ${commentType === 'contains'
-                ? 'border-primary-500 bg-primary-50'
-                : 'border-gray-200 hover:border-gray-300'
-              }
-            `}
-          >
-            <div className="flex items-center mb-2">
-              <Zap className={`h-5 w-5 mr-2 ${commentType === 'contains' ? 'text-primary-500' : 'text-gray-400'}`} />
-              <span className={`font-medium ${commentType === 'contains' ? 'text-primary-700' : 'text-gray-700'}`}>
-                Contains
-              </span>
-            </div>
-            <p className="text-xs text-gray-600">Trigger when comment contains phrase</p>
-          </button>
-        </div>
-      </div>
+      <Divider sx={{ my: 3 }} />
 
       {/* Comment Input */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {commentType === 'exact' ? 'Exact Comment Text' : 
-           commentType === 'keyword' ? 'Keyword to Match' : 
-           'Phrase to Match'}
-        </label>
-        <textarea
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+          Trigger Comment
+        </Typography>
+        <TextField
+          fullWidth
+          multiline
+          rows={3}
           value={comment}
           onChange={(e) => onCommentChange(e.target.value)}
-          placeholder={
-            commentType === 'exact' ? 'Enter the exact comment text...' :
-            commentType === 'keyword' ? 'Enter keyword (e.g., "interested")' :
-            'Enter phrase (e.g., "more information")'
-          }
-          className="input-field h-24 resize-none"
-          rows={3}
+          placeholder={`Enter the comment that will trigger your automation...\n\nExample: ${triggerType === 'exact' ? '"interested"' : triggerType === 'keyword' ? 'interested, want, need' : 'interested'}`}
+          variant="outlined"
+          sx={{ mb: 2 }}
         />
-        <p className="text-xs text-gray-500 mt-1">
-          {commentType === 'exact' ? 'Only triggers when someone comments exactly this text' :
-           commentType === 'keyword' ? 'Triggers when comment contains this keyword (case-insensitive)' :
-           'Triggers when comment contains this phrase (case-insensitive)'}
-        </p>
-      </div>
+        
+        {comment && (
+          <Box sx={{ p: 2, backgroundColor: 'primary.light', borderRadius: 1 }}>
+            <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>
+              Automation will trigger when someone comments: "{comment}"
+            </Typography>
+          </Box>
+        )}
+      </Box>
 
-      {/* Suggested Keywords */}
-      {commentType === 'keyword' && (
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Popular Keywords
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {suggestedKeywords.map((keyword) => (
-              <button
-                key={keyword}
-                onClick={() => handleKeywordSelect(keyword)}
-                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm transition-colors"
-              >
-                {keyword}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Preview */}
-      {comment && (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Preview</h4>
-          <div className="text-sm text-gray-600">
-            <p>When someone comments:</p>
-            <div className="mt-1 p-2 bg-white rounded border">
-              <span className="font-medium">"{comment}"</span>
-            </div>
-            <p className="mt-2">→ Your automation will trigger and send a DM</p>
-          </div>
-        </div>
-      )}
+      {/* Quick Triggers */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+          Quick Triggers
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+          Click to use common trigger phrases
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {quickTriggers.map((trigger) => (
+            <Chip
+              key={trigger}
+              label={trigger}
+              onClick={() => handleQuickTrigger(trigger)}
+              variant={comment === trigger ? 'filled' : 'outlined'}
+              color={comment === trigger ? 'primary' : 'default'}
+              sx={{ cursor: 'pointer' }}
+            />
+          ))}
+        </Box>
+      </Box>
 
       {/* Navigation */}
-      <div className="flex justify-between">
-        <button
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
           onClick={onPrevious}
-          className="btn-secondary flex items-center"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
-        </button>
+        </Button>
         
-        <button
+        <Button
+          variant="contained"
+          endIcon={<ArrowForward />}
           onClick={onNext}
           disabled={!canProceed}
-          className={`
-            flex items-center px-6 py-2 rounded-lg font-medium transition-colors
-            ${canProceed
-              ? 'bg-primary-500 hover:bg-primary-600 text-white'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          sx={{
+            background: 'linear-gradient(135deg, #E4405F 0%, #405DE6 100%)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #C2185B 0%, #303F9F 100%)'
             }
-          `}
+          }}
         >
           Next
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+
+      {!canProceed && (
+        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 2, display: 'block', textAlign: 'center' }}>
+          Enter a trigger comment to continue
+        </Typography>
+      )}
+    </Paper>
   )
 }
 

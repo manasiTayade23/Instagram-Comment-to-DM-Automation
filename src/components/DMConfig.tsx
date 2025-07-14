@@ -1,5 +1,20 @@
 import React, { useState } from 'react'
-import { Send, ArrowLeft, Sparkles, Clock, User } from 'lucide-react'
+import { 
+  Box, 
+  Paper, 
+  Typography, 
+  TextField, 
+  Button, 
+  Grid, 
+  Card, 
+  CardContent, 
+  Chip,
+  Avatar,
+  Checkbox,
+  FormControlLabel,
+  Divider
+} from '@mui/material'
+import { Send, ArrowBack, AutoAwesome } from '@mui/icons-material'
 
 interface DMConfigProps {
   dmMessage: string
@@ -16,7 +31,6 @@ const DMConfig: React.FC<DMConfigProps> = ({
   onGoLive,
   canGoLive
 }) => {
-  const [delay, setDelay] = useState(5)
   const [includeEmoji, setIncludeEmoji] = useState(true)
 
   const messageTemplates = [
@@ -54,179 +68,208 @@ const DMConfig: React.FC<DMConfigProps> = ({
       post: '{{post_title}}'
     }
     
-    const cursorPos = (document.querySelector('textarea') as HTMLTextAreaElement)?.selectionStart || 0
-    const newMessage = dmMessage.slice(0, cursorPos) + personalizations[type as keyof typeof personalizations] + dmMessage.slice(cursorPos)
-    onMessageChange(newMessage)
+    const textarea = document.querySelector('textarea') as HTMLTextAreaElement
+    if (textarea) {
+      const cursorPos = textarea.selectionStart || 0
+      const newMessage = dmMessage.slice(0, cursorPos) + personalizations[type as keyof typeof personalizations] + dmMessage.slice(cursorPos)
+      onMessageChange(newMessage)
+    }
   }
 
   return (
-    <div className="card">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Set DM Message</h2>
-          <p className="text-gray-600">Create the message that will be sent automatically</p>
-        </div>
-        <Send className="h-8 w-8 text-instagram-500" />
-      </div>
+    <Paper sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box>
+          <Typography variant="h5" component="h2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+            Set DM Message
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Create the message that will be sent automatically
+          </Typography>
+        </Box>
+        <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+          <Send sx={{ color: 'white' }} />
+        </Avatar>
+      </Box>
 
       {/* Message Templates */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
           Quick Templates
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        </Typography>
+        <Grid container spacing={2}>
           {messageTemplates.map((template, index) => (
-            <button
-              key={index}
-              onClick={() => handleTemplateSelect(template)}
-              className="p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
-            >
-              <div className="flex items-center mb-1">
-                <span className="text-lg mr-2">{template.emoji}</span>
-                <span className="font-medium text-sm text-gray-900">{template.title}</span>
-              </div>
-              <p className="text-xs text-gray-600 line-clamp-2">{template.message}</p>
-            </button>
+            <Grid item xs={12} sm={6} key={index}>
+              <Card 
+                sx={{ 
+                  cursor: 'pointer',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    backgroundColor: 'primary.light'
+                  }
+                }}
+                onClick={() => handleTemplateSelect(template)}
+              >
+                <CardContent sx={{ p: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="h6" sx={{ mr: 1 }}>{template.emoji}</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      {template.title}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ 
+                    color: 'text.secondary',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}>
+                    {template.message}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </div>
-      </div>
+        </Grid>
+      </Box>
+
+      <Divider sx={{ my: 3 }} />
 
       {/* Message Input */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
           Your Message
-        </label>
-        <textarea
+        </Typography>
+        <TextField
+          fullWidth
+          multiline
+          rows={4}
           value={dmMessage}
           onChange={(e) => onMessageChange(e.target.value)}
           placeholder="Write your DM message here... (You can use personalization tags below)"
-          className="input-field h-32 resize-none"
-          rows={4}
+          variant="outlined"
+          sx={{ mb: 2 }}
         />
         
         {/* Personalization Tags */}
-        <div className="mt-3">
-          <label className="block text-xs font-medium text-gray-600 mb-2">
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: 'text.secondary' }}>
             Personalization Tags
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <button
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            <Chip
+              label="👤 {{user_name}}"
+              size="small"
               onClick={() => addPersonalization('name')}
-              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs transition-colors"
-            >
-              <User className="inline h-3 w-3 mr-1" />
-              {{user_name}}
-            </button>
-            <button
+              sx={{ cursor: 'pointer' }}
+            />
+            <Chip
+              label="@{{username}}"
+              size="small"
               onClick={() => addPersonalization('username')}
-              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs transition-colors"
-            >
-              @{{username}}
-            </button>
-            <button
+              sx={{ cursor: 'pointer' }}
+            />
+            <Chip
+              label='"{{comment}}"'
+              size="small"
               onClick={() => addPersonalization('comment')}
-              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs transition-colors"
-            >
-              "{{comment}}"
-            </button>
-            <button
+              sx={{ cursor: 'pointer' }}
+            />
+            <Chip
+              label="{{post_title}}"
+              size="small"
               onClick={() => addPersonalization('post')}
-              className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs transition-colors"
-            >
-              {{post_title}}
-            </button>
-          </div>
-        </div>
-      </div>
+              sx={{ cursor: 'pointer' }}
+            />
+          </Box>
+        </Box>
+      </Box>
 
       {/* Settings */}
-      <div className="mb-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Send Delay
-          </label>
-          <div className="flex items-center space-x-3">
-            <input
-              type="range"
-              min="1"
-              max="60"
-              value={delay}
-              onChange={(e) => setDelay(parseInt(e.target.value))}
-              className="flex-1"
+      <Box sx={{ mb: 4 }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={includeEmoji}
+              onChange={(e) => setIncludeEmoji(e.target.checked)}
+              color="primary"
             />
-            <span className="text-sm text-gray-600 min-w-[60px]">{delay} min</span>
-          </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Wait {delay} minutes after the comment before sending the DM
-          </p>
-        </div>
-
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="includeEmoji"
-            checked={includeEmoji}
-            onChange={(e) => setIncludeEmoji(e.target.checked)}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-          />
-          <label htmlFor="includeEmoji" className="ml-2 text-sm text-gray-700">
-            Include friendly emojis in messages
-          </label>
-        </div>
-      </div>
+          }
+          label="Include friendly emojis in messages"
+        />
+      </Box>
 
       {/* Preview */}
       {dmMessage && (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Message Preview</h4>
-          <div className="bg-white p-3 rounded-lg border max-w-sm">
-            <div className="flex items-center mb-2">
-              <div className="w-8 h-8 bg-instagram-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">You</span>
-              </div>
-              <div className="ml-2 text-xs text-gray-500">
-                {delay} min after comment
-              </div>
-            </div>
-            <div className="bg-instagram-100 p-3 rounded-lg">
-              <p className="text-sm text-gray-800">{dmMessage}</p>
-            </div>
-          </div>
-        </div>
+        <Box sx={{ mb: 4, p: 3, backgroundColor: 'grey.50', borderRadius: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+            Message Preview
+          </Typography>
+          <Card sx={{ maxWidth: 400 }}>
+            <CardContent sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32, mr: 1 }}>
+                  <Typography variant="caption" sx={{ color: 'white', fontWeight: 600 }}>
+                    You
+                  </Typography>
+                </Avatar>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  Immediate response
+                </Typography>
+              </Box>
+              <Box sx={{ 
+                backgroundColor: 'primary.light', 
+                p: 2, 
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'primary.main'
+              }}>
+                <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                  {dmMessage}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
       )}
 
       {/* Navigation and Go Live */}
-      <div className="flex justify-between items-center">
-        <button
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
           onClick={onPrevious}
-          className="btn-secondary flex items-center"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
-        </button>
+        </Button>
         
-        <button
+        <Button
+          variant="contained"
+          startIcon={<AutoAwesome />}
           onClick={onGoLive}
           disabled={!canGoLive}
-          className={`
-            flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-200
-            ${canGoLive
-              ? 'bg-gradient-to-r from-instagram-500 to-instagram-600 hover:from-instagram-600 hover:to-instagram-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          sx={{
+            background: 'linear-gradient(135deg, #E4405F 0%, #405DE6 100%)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #C2185B 0%, #303F9F 100%)'
+            },
+            '&:disabled': {
+              background: 'grey.300'
             }
-          `}
+          }}
         >
-          <Sparkles className="h-5 w-5 mr-2" />
           Go Live
-        </button>
-      </div>
+        </Button>
+      </Box>
 
       {!canGoLive && (
-        <p className="text-xs text-gray-500 mt-2 text-center">
+        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 2, display: 'block', textAlign: 'center' }}>
           Complete all steps to activate your automation
-        </p>
+        </Typography>
       )}
-    </div>
+    </Paper>
   )
 }
 

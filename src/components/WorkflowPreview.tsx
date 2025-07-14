@@ -1,5 +1,32 @@
-import React from 'react'
-import { Instagram, MessageSquare, Send, Play, Image, Zap, CheckCircle } from 'lucide-react'
+import React, { useState } from 'react'
+import { 
+  Box, 
+  Paper, 
+  Typography, 
+  TextField, 
+  Button, 
+  Card, 
+  CardContent, 
+  Avatar, 
+  Chip,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material'
+import { 
+  Instagram, 
+  Message, 
+  Send, 
+  PlayArrow, 
+  CheckCircle, 
+  Close,
+  Favorite,
+  ChatBubbleOutline,
+  Share,
+  Science
+} from '@mui/icons-material'
 import { WorkflowData } from '../types'
 
 interface WorkflowPreviewProps {
@@ -8,6 +35,9 @@ interface WorkflowPreviewProps {
 
 const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({ workflowData }) => {
   const { selectedPost, comment, dmMessage, isLive } = workflowData
+  const [testComment, setTestComment] = useState('')
+  const [simulatedComments, setSimulatedComments] = useState<Array<{id: string, text: string, username: string, timestamp: string}>>([])
+  const [expandedVideo, setExpandedVideo] = useState(false)
 
   const canGoLive = selectedPost && comment && dmMessage
 
@@ -20,178 +50,412 @@ const WorkflowPreview: React.FC<WorkflowPreviewProps> = ({ workflowData }) => {
 
   const getStepIcon = (step: number) => {
     const status = getStepStatus(step)
-    if (status === 'completed') return <CheckCircle className="h-5 w-5 text-green-500" />
+    if (status === 'completed') return <CheckCircle sx={{ color: 'success.main' }} />
     
     switch (step) {
-      case 0: return <Instagram className="h-5 w-5 text-gray-400" />
-      case 1: return <MessageSquare className="h-5 w-5 text-gray-400" />
-      case 2: return <Send className="h-5 w-5 text-gray-400" />
+      case 0: return <Instagram sx={{ color: 'grey.400' }} />
+      case 1: return <Message sx={{ color: 'grey.400' }} />
+      case 2: return <Send sx={{ color: 'grey.400' }} />
       default: return null
     }
   }
 
+  const addTestComment = () => {
+    if (testComment.trim()) {
+      const newComment = {
+        id: Date.now().toString(),
+        text: testComment,
+        username: 'test_user_' + Math.floor(Math.random() * 1000),
+        timestamp: 'Just now'
+      }
+      setSimulatedComments(prev => [newComment, ...prev])
+      setTestComment('')
+    }
+  }
+
+  const shouldTriggerAutomation = (commentText: string) => {
+    if (!comment) return false
+    return commentText.toLowerCase().includes(comment.toLowerCase())
+  }
+
+  const handleVideoClick = () => {
+    setExpandedVideo(true)
+  }
+
+  const closeExpandedVideo = () => {
+    setExpandedVideo(false)
+  }
+
   return (
-    <div className="card">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Workflow Preview</h2>
-          <p className="text-gray-600">See how your automation will work</p>
-        </div>
-        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${
-          isLive 
-            ? 'bg-green-100 text-green-700' 
-            : 'bg-gray-100 text-gray-600'
-        }`}>
-          <div className={`w-2 h-2 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
-          {isLive ? 'Live' : 'Preview'}
-        </div>
-      </div>
+    <Paper sx={{ p: 3, height: 'fit-content' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box>
+          <Typography variant="h5" component="h2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+            Workflow Preview
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            See how your automation will work
+          </Typography>
+        </Box>
+        <Chip
+          icon={isLive ? <CheckCircle /> : <Instagram />}
+          label={isLive ? 'Live' : 'Preview'}
+          color={isLive ? 'success' : 'default'}
+          variant={isLive ? 'filled' : 'outlined'}
+        />
+      </Box>
 
       {/* Instagram Post Preview */}
       {selectedPost && (
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Selected Content</h3>
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden max-w-sm">
-            <div className="relative">
-              <img
-                src={selectedPost.imageUrl}
-                alt={selectedPost.caption}
-                className="w-full h-48 object-cover"
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+            Selected Content
+          </Typography>
+          
+          {expandedVideo && selectedPost.id === '5' ? (
+            // Expanded video view
+            <Card sx={{ overflow: 'hidden' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Instagram Reel Preview
+                </Typography>
+                <Button
+                  size="small"
+                  onClick={closeExpandedVideo}
+                  startIcon={<Close />}
+                >
+                  Close
+                </Button>
+              </Box>
+              <Box sx={{ position: 'relative' }}>
+                <iframe
+                  src="https://www.youtube.com/embed/Ux2zKPR6RD0?controls=1&modestbranding=1&rel=0&showinfo=1&autoplay=1&mute=0"
+                  title="Instagram Automation Demo"
+                  style={{ width: '100%', height: 320, border: 'none' }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </Box>
+              <CardContent sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>@automation_master</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>Just now</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  🚀 NEW: Instagram Automation Tool! Automate your comment responses and grow your business! 💼✨
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  🔥 Comment "interested" below to get early access!
+                </Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  #automation #instagram #business #growth #marketing
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Favorite sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>5,421</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ChatBubbleOutline sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>423</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Share sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>Share</Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          ) : (
+            // Regular preview
+            <Card sx={{ maxWidth: 400 }}>
+              <Box sx={{ position: 'relative' }}>
+                {selectedPost.id === '5' ? (
+                  // Video reel preview with clickable overlay
+                  <Box sx={{ position: 'relative', height: 200 }}>
+                    <iframe
+                      src="https://www.youtube.com/embed/Ux2zKPR6RD0?controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=Ux2zKPR6RD0&mute=1&autoplay=0"
+                      title="Instagram Automation Demo"
+                      style={{ width: '100%', height: '100%', border: 'none' }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                    {/* Clickable play button overlay */}
+                    <Box 
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'rgba(0,0,0,0.3)',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0,0,0,0.4)'
+                        }
+                      }}
+                      onClick={handleVideoClick}
+                    >
+                      <Avatar sx={{ 
+                        width: 64, 
+                        height: 64, 
+                        backgroundColor: 'white',
+                        '&:hover': {
+                          backgroundColor: 'grey.100'
+                        }
+                      }}>
+                        <PlayArrow sx={{ color: 'primary.main', ml: 0.5, fontSize: 32 }} />
+                      </Avatar>
+                    </Box>
+                    {/* Video duration indicator */}
+                    <Chip
+                      label="0:30"
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        bottom: 12,
+                        right: 12,
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        color: 'white'
+                      }}
+                    />
+                    {/* Reel indicator */}
+                    <Chip
+                      label="REELS"
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: 12,
+                        left: 12,
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        color: 'white'
+                      }}
+                    />
+                  </Box>
+                ) : (
+                  // Regular image preview
+                  <Box
+                    component="img"
+                    src={selectedPost.imageUrl}
+                    alt={selectedPost.caption}
+                    sx={{ width: '100%', height: 200, objectFit: 'cover' }}
+                  />
+                )}
+                {selectedPost.type === 'reel' && selectedPost.id !== '5' && (
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    borderRadius: '50%',
+                    p: 0.5
+                  }}>
+                    <PlayArrow sx={{ color: 'white', fontSize: 16 }} />
+                  </Box>
+                )}
+              </Box>
+              <CardContent sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    @{selectedPost.username}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    {selectedPost.timestamp}
+                  </Typography>
+                </Box>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                  {selectedPost.caption}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Favorite sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {selectedPost.likes.toLocaleString()}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ChatBubbleOutline sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {selectedPost.comments}
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+      )}
+
+      {/* Interactive Comment Test Section */}
+      {selectedPost && comment && dmMessage && (
+        <Box sx={{ mb: 3, p: 3, background: 'linear-gradient(135deg, #E4405F10 0%, #405DE610 100%)', borderRadius: 2, border: '1px solid', borderColor: 'primary.main' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Science sx={{ color: 'primary.main', mr: 1 }} />
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
+              Test Your Automation
+            </Typography>
+          </Box>
+          
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: 'text.secondary' }}>
+              Add a test comment:
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <TextField
+                fullWidth
+                size="small"
+                value={testComment}
+                onChange={(e) => setTestComment(e.target.value)}
+                placeholder={`Try commenting "${comment}" to trigger automation`}
+                variant="outlined"
               />
-              {selectedPost.type === 'reel' && (
-                <div className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-1">
-                  <Play className="h-4 w-4 text-white" />
-                </div>
-              )}
-            </div>
-            <div className="p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-900">@{selectedPost.username}</span>
-                <span className="text-xs text-gray-500">{selectedPost.timestamp}</span>
-              </div>
-              <p className="text-sm text-gray-800 mb-2">{selectedPost.caption}</p>
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>❤️ {selectedPost.likes.toLocaleString()}</span>
-                <span>💬 {selectedPost.comments}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+              <Button
+                variant="contained"
+                onClick={addTestComment}
+                disabled={!testComment.trim()}
+                sx={{ minWidth: 'auto' }}
+              >
+                Comment
+              </Button>
+            </Box>
+          </Box>
+
+          {/* Simulated Comments */}
+          {simulatedComments.length > 0 && (
+            <Box>
+              <Typography variant="body2" sx={{ mb: 2, fontWeight: 600, color: 'text.secondary' }}>
+                Recent Comments:
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {simulatedComments.map((commentItem) => (
+                  <Box key={commentItem.id}>
+                    {/* User Comment */}
+                    <Card sx={{ mb: 1 }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <Avatar sx={{ width: 24, height: 24, mr: 1, fontSize: '0.75rem' }}>
+                            {commentItem.username.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            {commentItem.username} commented:
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                          "{commentItem.text}"
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Immediate Automation Response */}
+                    {shouldTriggerAutomation(commentItem.text) && (
+                      <Card sx={{ ml: 2, backgroundColor: 'success.light' }}>
+                        <CardContent sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <Avatar sx={{ bgcolor: 'primary.main', width: 20, height: 20, mr: 1, fontSize: '0.625rem' }}>
+                              You
+                            </Avatar>
+                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                              DM sent immediately:
+                            </Typography>
+                          </Box>
+                          <Box sx={{ backgroundColor: 'white', p: 1, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+                            <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                              {dmMessage}
+                            </Typography>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
+        </Box>
       )}
 
       {/* Workflow Steps */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-700">Automation Flow</h3>
+      <Box>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'text.primary' }}>
+          Automation Flow
+        </Typography>
         
-        {/* Step 1: Monitor Post */}
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 mt-1">
-            {getStepIcon(0)}
-          </div>
-          <div className="flex-1">
-            <div className="text-sm font-medium text-gray-900">Monitor Post</div>
-            <div className="text-xs text-gray-600">
-              {selectedPost 
+        <List sx={{ p: 0 }}>
+          {/* Step 1: Monitor Post */}
+          <ListItem sx={{ px: 0 }}>
+            <ListItemIcon>
+              {getStepIcon(0)}
+            </ListItemIcon>
+            <ListItemText
+              primary="Monitor Post"
+              secondary={selectedPost 
                 ? `Watching for comments on "${selectedPost.caption.substring(0, 50)}..."`
                 : 'Select a post to monitor'
               }
-            </div>
-          </div>
-        </div>
+            />
+          </ListItem>
 
-        {/* Step 2: Comment Trigger */}
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 mt-1">
-            {getStepIcon(1)}
-          </div>
-          <div className="flex-1">
-            <div className="text-sm font-medium text-gray-900">Comment Trigger</div>
-            <div className="text-xs text-gray-600">
-              {comment 
+          {/* Step 2: Comment Trigger */}
+          <ListItem sx={{ px: 0 }}>
+            <ListItemIcon>
+              {getStepIcon(1)}
+            </ListItemIcon>
+            <ListItemText
+              primary="Comment Trigger"
+              secondary={comment 
                 ? `Triggers when someone comments: "${comment}"`
                 : 'Set up comment trigger'
               }
-            </div>
-          </div>
-        </div>
+            />
+          </ListItem>
 
-        {/* Step 3: Send DM */}
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 mt-1">
-            {getStepIcon(2)}
-          </div>
-          <div className="flex-1">
-            <div className="text-sm font-medium text-gray-900">Send DM</div>
-            <div className="text-xs text-gray-600">
-              {dmMessage 
+          {/* Step 3: Send DM */}
+          <ListItem sx={{ px: 0 }}>
+            <ListItemIcon>
+              {getStepIcon(2)}
+            </ListItemIcon>
+            <ListItemText
+              primary="Send DM"
+              secondary={dmMessage 
                 ? `Sends message: "${dmMessage.substring(0, 50)}..."`
                 : 'Configure DM message'
               }
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Live Preview */}
-      {selectedPost && comment && dmMessage && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-instagram-50 to-primary-50 rounded-lg border border-instagram-200">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Live Preview</h3>
-          
-          {/* Simulated Comment */}
-          <div className="bg-white p-3 rounded-lg border mb-3">
-            <div className="flex items-center mb-2">
-              <div className="w-6 h-6 bg-gray-300 rounded-full mr-2"></div>
-              <span className="text-xs text-gray-600">user123 commented:</span>
-            </div>
-            <p className="text-sm text-gray-800">"{comment}"</p>
-          </div>
-
-          {/* Simulated DM */}
-          <div className="bg-white p-3 rounded-lg border">
-            <div className="flex items-center mb-2">
-              <div className="w-6 h-6 bg-instagram-500 rounded-full mr-2 flex items-center justify-center">
-                <span className="text-white text-xs font-medium">You</span>
-              </div>
-              <span className="text-xs text-gray-600">You sent a DM:</span>
-            </div>
-            <p className="text-sm text-gray-800">{dmMessage}</p>
-          </div>
-        </div>
-      )}
+            />
+          </ListItem>
+        </List>
+      </Box>
 
       {/* Status */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-sm font-medium text-gray-900">Workflow Status</div>
-            <div className="text-xs text-gray-600">
+      <Box sx={{ mt: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+              Workflow Status
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               {isLive ? 'Automation is active and running' : 'Ready to activate'}
-            </div>
-          </div>
-          <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-            isLive 
-              ? 'bg-green-100 text-green-700' 
-              : canGoLive 
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-gray-100 text-gray-600'
-          }`}>
-            {isLive ? 'Active' : canGoLive ? 'Ready' : 'Incomplete'}
-          </div>
-        </div>
-      </div>
+            </Typography>
+          </Box>
+          <Chip
+            label={isLive ? 'Active' : canGoLive ? 'Ready' : 'Incomplete'}
+            color={isLive ? 'success' : canGoLive ? 'primary' : 'default'}
+            variant={isLive ? 'filled' : 'outlined'}
+          />
+        </Box>
+      </Box>
 
       {/* Completion Status */}
       {!canGoLive && (
-        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center">
-            <Zap className="h-4 w-4 text-yellow-600 mr-2" />
-            <div className="text-sm text-yellow-800">
-              Complete all steps to activate your automation
-            </div>
-          </div>
-        </div>
+        <Box sx={{ mt: 2, p: 2, backgroundColor: 'warning.light', borderRadius: 2 }}>
+          <Typography variant="body2" sx={{ color: 'warning.dark', fontWeight: 600 }}>
+            Complete all steps to activate your automation
+          </Typography>
+        </Box>
       )}
-    </div>
+    </Paper>
   )
 }
 

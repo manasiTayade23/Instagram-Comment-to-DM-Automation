@@ -1,31 +1,50 @@
 import React from 'react'
-import { Instagram, Zap } from 'lucide-react'
+import { AppBar, Toolbar, Typography, Box, Avatar, Chip } from '@mui/material'
+import { Instagram, AutoAwesome } from '@mui/icons-material'
 
 const Header: React.FC = () => {
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <Instagram className="h-8 w-8 text-instagram-500" />
-              <Zap className="h-6 w-6 text-primary-500" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Workflow Builder</h1>
-              <p className="text-sm text-gray-600">Instagram Comment to DM Automation</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Ready to automate</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <AppBar 
+      position="static" 
+      elevation={0}
+      sx={{ 
+        backgroundColor: 'white',
+        borderBottom: '1px solid #DBDBDB',
+        color: 'text.primary'
+      }}
+    >
+      <Toolbar>
+        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+          <Instagram sx={{ color: 'primary.main', fontSize: 32, mr: 2 }} />
+          <Box>
+            <Typography variant="h5" component="h1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+              Instagram Automation
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Comment-to-DM Workflow Builder
+            </Typography>
+          </Box>
+        </Box>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Chip
+            icon={<AutoAwesome />}
+            label="Beta"
+            size="small"
+            sx={{
+              backgroundColor: 'primary.light',
+              color: 'primary.main',
+              fontWeight: 600,
+            }}
+          />
+          <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+            <Typography variant="caption" sx={{ color: 'white', fontWeight: 600 }}>
+              U
+            </Typography>
+          </Avatar>
+        </Box>
+      </Toolbar>
+    </AppBar>
   )
 }
 

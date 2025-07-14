@@ -1,136 +1,149 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { Box, Paper, Stepper, Step, StepLabel, StepContent, Button, Typography } from '@mui/material'
+import { CheckCircle, Instagram, Message, Send } from '@mui/icons-material'
 import PostSelector from './PostSelector'
 import CommentConfig from './CommentConfig'
 import DMConfig from './DMConfig'
 import WorkflowPreview from './WorkflowPreview'
-import { WorkflowData, WorkflowStep } from '../types'
+import { WorkflowData } from '../types'
 
 interface WorkflowBuilderProps {
+  currentStep: number
   workflowData: WorkflowData
-  onWorkflowUpdate: (data: Partial<WorkflowData>) => void
+  setWorkflowData: (data: WorkflowData) => void
+  onNext: () => void
+  onPrevious: () => void
   onGoLive: () => void
 }
 
 const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
+  currentStep,
   workflowData,
-  onWorkflowUpdate,
+  setWorkflowData,
+  onNext,
+  onPrevious,
   onGoLive
 }) => {
-  const [currentStep, setCurrentStep] = useState(0)
-
-  const steps: WorkflowStep[] = [
+  const steps = [
     {
-      id: 'post',
-      title: 'Select Post/Reel',
-      description: 'Choose the Instagram post or reel to monitor',
-      isCompleted: !!workflowData.selectedPost,
-      isActive: currentStep === 0
+      label: 'Select Post/Reel',
+      description: 'Choose Instagram content to monitor',
+      icon: <Instagram />
     },
     {
-      id: 'comment',
-      title: 'Configure Comment',
-      description: 'Set up the comment or keyword to trigger the automation',
-      isCompleted: !!workflowData.comment,
-      isActive: currentStep === 1
+      label: 'Configure Trigger',
+      description: 'Set up comment conditions',
+      icon: <Message />
     },
     {
-      id: 'dm',
-      title: 'Set DM Message',
-      description: 'Create the message to send via DM',
-      isCompleted: !!workflowData.dmMessage,
-      isActive: currentStep === 2
+      label: 'Set DM Message',
+      description: 'Create automated response',
+      icon: <Send />
     }
   ]
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
+  const handleWorkflowUpdate = (updates: Partial<WorkflowData>) => {
+    setWorkflowData({ ...workflowData, ...updates })
+  }
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case 0:
+        return !!workflowData.selectedPost
+      case 1:
+        return !!workflowData.comment
+      case 2:
+        return !!workflowData.dmMessage
+      default:
+        return false
     }
   }
 
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+  const renderStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return (
+          <PostSelector
+            selectedPost={workflowData.selectedPost}
+            onPostSelect={(post) => handleWorkflowUpdate({ selectedPost: post })}
+          />
+        )
+      case 1:
+        return (
+          <CommentConfig
+            comment={workflowData.comment}
+            onCommentChange={(comment) => handleWorkflowUpdate({ comment })}
+            onPrevious={onPrevious}
+            onNext={onNext}
+            canProceed={canProceed()}
+          />
+        )
+      case 2:
+        return (
+          <DMConfig
+            dmMessage={workflowData.dmMessage}
+            onMessageChange={(dmMessage) => handleWorkflowUpdate({ dmMessage })}
+            onPrevious={onPrevious}
+            onGoLive={onGoLive}
+            canGoLive={canProceed()}
+          />
+        )
+      default:
+        return null
     }
   }
-
-  const canGoLive = workflowData.selectedPost && workflowData.comment && workflowData.dmMessage
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Progress Steps */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
-              <div className="flex flex-col items-center">
-                <div className={`
-                  w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium
-                  ${step.isCompleted 
-                    ? 'bg-green-500 text-white' 
-                    : step.isActive 
-                    ? 'bg-primary-500 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-                  }
-                `}>
-                  {step.isCompleted ? '✓' : index + 1}
-                </div>
-                <div className="mt-2 text-center">
-                  <div className="text-sm font-medium text-gray-900">{step.title}</div>
-                  <div className="text-xs text-gray-500">{step.description}</div>
-                </div>
-              </div>
-              {index < steps.length - 1 && (
-                <div className={`
-                  w-16 h-0.5 mx-4
-                  ${step.isCompleted ? 'bg-green-500' : 'bg-gray-200'}
-                `} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+    <Box sx={{ display: 'flex', gap: 4, flexDirection: { xs: 'column', lg: 'row' } }}>
+      {/* Main Workflow Area */}
+      <Box sx={{ flex: 1 }}>
+        <Paper sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h4" component="h2" sx={{ mb: 3, fontWeight: 600, color: 'text.primary' }}>
+            Build Your Automation
+          </Typography>
+          
+          <Stepper activeStep={currentStep} orientation="vertical">
+            {steps.map((step, index) => (
+              <Step key={step.label}>
+                <StepLabel
+                  StepIconComponent={({ active, completed }) => (
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      backgroundColor: completed ? 'success.main' : active ? 'primary.main' : 'grey.300',
+                      color: completed || active ? 'white' : 'grey.600'
+                    }}>
+                      {completed ? <CheckCircle /> : step.icon}
+                    </Box>
+                  )}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {step.label}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {step.description}
+                  </Typography>
+                </StepLabel>
+                <StepContent>
+                  <Box sx={{ mt: 2 }}>
+                    {renderStepContent(index)}
+                  </Box>
+                </StepContent>
+              </Step>
+            ))}
+          </Stepper>
+        </Paper>
+      </Box>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column - Configuration */}
-        <div className="space-y-6">
-          {currentStep === 0 && (
-            <PostSelector
-              selectedPost={workflowData.selectedPost}
-              onPostSelect={(post) => {
-                onWorkflowUpdate({ selectedPost: post })
-                handleNext()
-              }}
-            />
-          )}
-
-          {currentStep === 1 && (
-            <CommentConfig
-              comment={workflowData.comment}
-              onCommentChange={(comment) => onWorkflowUpdate({ comment })}
-              onNext={handleNext}
-              onPrevious={handlePrevious}
-            />
-          )}
-
-          {currentStep === 2 && (
-            <DMConfig
-              dmMessage={workflowData.dmMessage}
-              onMessageChange={(dmMessage) => onWorkflowUpdate({ dmMessage })}
-              onPrevious={handlePrevious}
-              onGoLive={onGoLive}
-              canGoLive={canGoLive}
-            />
-          )}
-        </div>
-
-        {/* Right Column - Preview */}
-        <div className="lg:sticky lg:top-8">
-          <WorkflowPreview workflowData={workflowData} />
-        </div>
-      </div>
-    </div>
+      {/* Preview Panel */}
+      <Box sx={{ width: { xs: '100%', lg: 400 } }}>
+        <WorkflowPreview workflowData={workflowData} />
+      </Box>
+    </Box>
   )
 }
 
